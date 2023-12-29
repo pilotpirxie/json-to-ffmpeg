@@ -2,13 +2,16 @@ import { ImageClip } from "./types/Clip";
 import { Inputs } from "./types/Inputs";
 import { findInputIndex } from "./utils/findInputIndex";
 import { findInput } from "./utils/findInput";
+import { Output } from "./types/Output";
 
 export function parseImageClip({
   clip,
   inputs,
+  output,
 }: {
   clip: ImageClip;
   inputs: Inputs;
+  output: Output;
 }): string {
   const { name, duration, source, transform } = clip;
   const { width, height, rotation, opacity } = transform;
@@ -20,7 +23,7 @@ export function parseImageClip({
   let filters: string[] = [];
 
   if (hasVideo) {
-    filters.push(`loop=loop=-1:size=${duration}`);
+    filters.push(`loop=loop=-1:size=${duration * output.framerate}`);
     filters.push(`setpts=PTS-STARTPTS`);
     filters.push(`scale=${width}:${height}`);
     filters.push(`rotate=${rotation}`);

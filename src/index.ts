@@ -9,9 +9,14 @@ export function parseSchema(schema: VideoEditorFormat): string {
   outputCommand += parseInputs({
     inputs: schema.inputs,
   });
+
+  outputCommand += '-filter_complex "';
+
   outputCommand += parseTracks({
     schema,
   });
+
+  outputCommand += '" ';
   outputCommand += parseOutput({
     output: schema.output,
   });

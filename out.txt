@@ -5,6 +5,7 @@ ffmpeg -i video1.mp4
 -i audio1.mp3
 -i audio2.mp3
 -i watermark.png
+-filter_complex "color=c=black:s=1920x1080:d=60[base];
 [0:v]trim=10:5,setpts=PTS-STARTPTS,scale=1920:1080,rotate=0,colorchannelmixer=aa=1[clip1];
 [0:v]trim=30:5,setpts=PTS-STARTPTS,scale=1920:1080,rotate=0,colorchannelmixer=aa=1[clip2];
 [2:v]trim=3:5,setpts=PTS-STARTPTS,scale=1920:1080,rotate=0,colorchannelmixer=aa=1[clip3];
@@ -14,11 +15,12 @@ ffmpeg -i video1.mp4
 [3:v]trim=0:5,setpts=PTS-STARTPTS,scale=1920:1080,rotate=0,colorchannelmixer=aa=1[clip7];
 [3:v]trim=10:5,setpts=PTS-STARTPTS,scale=1920:1080,rotate=0,colorchannelmixer=aa=1[clip8];
 [clip1][clip2][clip3][clip4][clip5][clip6][clip7][clip8]concat=n=8:v=1:a=0[track_with_some_videos];
-[6:v]loop=loop=-1:size=60,setpts=PTS-STARTPTS,scale=300:150,rotate=0,colorchannelmixer=aa=1[watermark_clip];
+[6:v]loop=loop=-1:size=1800,setpts=PTS-STARTPTS,scale=300:150,rotate=0,colorchannelmixer=aa=1[watermark_clip];
 [watermark_clip]concat=n=1:v=1:a=0[track_with_watermark];
 [4:a]atrim=0:50,asetpts=PTS-STARTPTS,volume=1[audio_clip1];
 [5:a]atrim=0:40,asetpts=PTS-STARTPTS,volume=1[audio_clip2];
 [audio_clip1][audio_clip2]concat=n=2:v=0:a=1[track2];
-[track_with_some_videos][track_with_watermark]overlay=0:0[video_output];
+[base][track_with_some_videos]overlay=0:0[combined_track_with_some_videos];
+[combined_track_with_some_videos][track_with_watermark]overlay=0:0[video_output];
 [track2]amix=inputs=1:duration=longest[audio_output];
--map [video_output] -map [audio_output] -c:v libx264 -c:a aac -b:v 5000k -r 30 -s 1920x1080 output.mp4
+" -map [video_output] -map [audio_output] -c:v libx264 -c:a aac -b:v 5000k -r 30 -s 1920x1080 output.mp4

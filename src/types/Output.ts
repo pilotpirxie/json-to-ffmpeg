@@ -3,7 +3,8 @@ export type Output = {
   format: string;
   videoCodec: string;
   audioCodec: string;
-  resolution: string;
+  width: number;
+  height: number;
   bitrate: string;
   framerate: number;
 };

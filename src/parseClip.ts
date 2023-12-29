@@ -3,13 +3,16 @@ import { Inputs } from "./types/Inputs";
 import { parseVideoClip } from "./parseVideoClip";
 import { parseAudioClip } from "./parseAudioClip";
 import { parseImageClip } from "./parseImageClip";
+import { Output } from "./types/Output";
 
 export function parseClip({
   clip,
   inputs,
+  output,
 }: {
   clip: Clip;
   inputs: Inputs;
+  output: Output;
 }): string {
   let clipString = "";
 
@@ -18,7 +21,7 @@ export function parseClip({
   } else if (clip.clipType === "audio") {
     clipString += parseAudioClip({ clip, inputs });
   } else if (clip.clipType === "image") {
-    clipString += parseImageClip({ clip, inputs });
+    clipString += parseImageClip({ clip, inputs, output });
   }
 
   return clipString + "\n";
