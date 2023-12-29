@@ -4,9 +4,9 @@ import { Transition } from "./Transition";
 export type ImageClip = {
   name: string;
   source: string;
-  start: number;
+  timelineTrackStart: number;
   duration: number;
-  offset: number;
+  sourceStartOffset: number;
   clipType: "image";
   transform: Transform;
 };
@@ -14,9 +14,9 @@ export type ImageClip = {
 export type VideoClip = {
   name: string;
   source: string;
-  start: number;
+  timelineTrackStart: number;
   duration: number;
-  offset: number;
+  sourceStartOffset: number;
   clipType: "video";
   transform: Transform;
   transitions: Transition[];
@@ -25,9 +25,9 @@ export type VideoClip = {
 export type AudioClip = {
   name: string;
   source: string;
-  start: number;
+  timelineTrackStart: number;
   duration: number;
-  offset: number;
+  sourceStartOffset: number;
   clipType: "audio";
   volume: number;
 };

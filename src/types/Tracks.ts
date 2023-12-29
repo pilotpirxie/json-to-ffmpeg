@@ -5,5 +5,6 @@ export type Tracks = {
 };
 
 export type Track = {
+  type: "video" | "audio";
   clips: Clip[];
 };
