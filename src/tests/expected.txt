@@ -1,0 +1,26 @@
+ffmpeg -i video1.mp4 -i video2.mp4 -i video3.mp4 -i video4.mp4 -i audio1.mp3 -i audio2.mp3 -i watermark.png \
+-filter_complex \
+"[0:v]fade=t=in:st=0:d=2,fade=t=out:st=4:d=1,setpts=PTS-STARTPTS+10/TB[clip1v]; \
+ [0:v]fade=t=in:st=5:d=2,fade=t=out:st=9:d=1,setpts=PTS-STARTPTS+30/TB[clip2v]; \
+ [2:v]fade=t=in:st=10:d=2,fade=t=out:st=14:d=1,setpts=PTS-STARTPTS+3/TB[clip3v]; \
+ [0:v]fade=t=in:st=15:d=1,fade=t=out:st=19:d=1,setpts=PTS-STARTPTS+27/TB[clip4v]; \
+ [1:v]fade=t=in:st=20:d=1,fade=t=out:st=24:d=1,setpts=PTS-STARTPTS/TB[clip5v]; \
+ [3:v]fade=t=in:st=25:d=3,fade=t=out:st=29:d=1,setpts=PTS-STARTPTS+15/TB[clip6v]; \
+ [3:v]fade=t=in:st=30:d=1,fade=t=out:st=34:d=1,setpts=PTS-STARTPTS/TB[clip7v]; \
+ [3:v]fade=t=in:st=35:d=1,fade=t=out:st=39:d=1,setpts=PTS-STARTPTS+10/TB[clip8v]; \
+ [clip1v][clip2v]xfade=transition=fade:duration=1:offset=15[xf1v]; \
+ [xf1v][clip3v]xfade=transition=fade:duration=1:offset=33[xf2v]; \
+ [xf2v][clip4v]xfade=transition=fade:duration=1:offset=52[xf3v]; \
+ [xf3v][clip5v]xfade=transition=fade:duration=1:offset=59[xf4v]; \
+ [xf4v][clip6v]xfade=transition=fade:duration=1:offset=64[xf5v]; \
+ [xf5v][clip7v]xfade=transition=fade:duration=1:offset=74[xf6v]; \
+ [xf6v][clip8v]xfade=transition=fade:duration=1:offset=79[xf7v]; \
+ [xf7v][6:v]overlay=1610:10:enable='between(t,0,60)'[outv]; \
+ [2:a]atrim=start=10:duration=5[audio3]; \
+ [3:a]atrim=start=25:duration=5[audio4a]; \
+ [3:a]atrim=start=30:duration=5[audio4b]; \
+ [3:a]atrim=start=35:duration=5[audio4c]; \
+ [4:a]atrim=start=0:duration=50[audio1]; \
+ [5:a]atrim=start=0:duration=40[audio2]; \
+ [audio1][audio2][audio3][audio4a][audio4b][audio4c]amix=inputs=6:duration=longest[audio]" \
+-map "[outv]" -map "[audio]" -c:v libx264 -c:a aac -b:v 5000k -r 30 output.mp4

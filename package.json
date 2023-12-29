@@ -1,0 +1,20 @@
+{
+  "name": "json-to-ffmpeg",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/pilotpirxie/json-to-ffmpeg.git",
+  "author": "pilotpirxie <10637666+pilotpirxie@users.noreply.github.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "prettier": "^3.1.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
