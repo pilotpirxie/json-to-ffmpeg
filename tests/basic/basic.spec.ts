@@ -1,7 +1,8 @@
-import { JsonToFFmpeg } from "../../src";
+import { parseSchema } from "../../src";
+import { VideoEditorFormat } from "../../src/types/VideoEditingFormat";
 
 (async () => {
-  const jsonToFFmpeg = new JsonToFFmpeg({
+  const schema: VideoEditorFormat = {
     inputs: {
       source1: {
         type: "video",
@@ -54,28 +55,7 @@ import { JsonToFFmpeg } from "../../src";
       },
     },
     tracks: {
-      track0: {
-        type: "video",
-        clips: [
-          {
-            name: "watermark_clip",
-            source: "watermark",
-            timelineTrackStart: 0,
-            duration: 60,
-            sourceStartOffset: 0,
-            clipType: "image",
-            transform: {
-              x: 1610,
-              y: 10,
-              width: 300,
-              height: 150,
-              rotation: 0,
-              opacity: 1,
-            },
-          },
-        ],
-      },
-      track1: {
+      track_with_some_videos: {
         type: "video",
         clips: [
           {
@@ -216,6 +196,27 @@ import { JsonToFFmpeg } from "../../src";
           },
         ],
       },
+      track_with_watermark: {
+        type: "video",
+        clips: [
+          {
+            name: "watermark_clip",
+            source: "watermark",
+            timelineTrackStart: 0,
+            duration: 60,
+            sourceStartOffset: 0,
+            clipType: "image",
+            transform: {
+              x: 1610,
+              y: 10,
+              width: 300,
+              height: 150,
+              rotation: 0,
+              opacity: 1,
+            },
+          },
+        ],
+      },
       track2: {
         type: "audio",
         clips: [
@@ -249,9 +250,9 @@ import { JsonToFFmpeg } from "../../src";
       bitrate: "5000k",
       framerate: 30,
     },
-  });
+  };
 
-  const ffmpegCommand = jsonToFFmpeg.parse();
+  const ffmpegCommand = parseSchema(schema);
 
   console.log(ffmpegCommand);
 })();
