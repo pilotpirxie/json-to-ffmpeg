@@ -232,7 +232,7 @@ import { VideoEditorFormat } from "../../src/types/VideoEditingFormat";
           {
             name: "audio_clip2",
             source: "audio2",
-            timelineTrackStart: 0,
+            timelineTrackStart: 50,
             duration: 40,
             sourceStartOffset: 0,
             clipType: "audio",
