@@ -19,7 +19,7 @@ export function parseAudioClip({
   let filters: string[] = [];
 
   if (hasAudio) {
-    filters.push(`atrim=${sourceStartOffset}:${duration}`);
+    filters.push(`atrim=${sourceStartOffset}:${sourceStartOffset + duration}`);
     filters.push(`asetpts=PTS-STARTPTS`);
     filters.push(`volume=${volume}`);
   }

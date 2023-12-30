@@ -16,7 +16,7 @@ export function parseSchema(schema: VideoEditorFormat): string {
     schema,
   });
 
-  outputCommand += '" ';
+  outputCommand += '" \\\n';
   outputCommand += parseOutput({
     output: schema.output,
   });

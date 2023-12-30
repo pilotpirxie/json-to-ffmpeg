@@ -20,7 +20,7 @@ export function parseVideoClip({
   let filters: string[] = [];
 
   if (hasVideo) {
-    filters.push(`trim=${sourceStartOffset}:${duration}`);
+    filters.push(`trim=${sourceStartOffset}:${sourceStartOffset + duration}`);
     filters.push(`setpts=PTS-STARTPTS`);
     filters.push(`scale=${width}:${height}`);
     filters.push(`rotate=${rotation}`);

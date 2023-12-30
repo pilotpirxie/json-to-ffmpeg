@@ -42,7 +42,7 @@ export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
     tracksCommand += `[${audioTrackName}]`;
   }
 
-  tracksCommand += `amix=inputs=${audioTracks.length}:duration=longest[audio_output];\n`;
+  tracksCommand += `amix=inputs=${audioTracks.length}:duration=longest[audio_output];`;
 
   return tracksCommand;
 }
