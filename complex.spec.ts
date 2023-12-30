@@ -252,6 +252,8 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
       crf: 23,
       framerate: 30,
       flags: ["-pix_fmt", "yuv420p"],
+      startPosition: 0,
+      endPosition: 35,
     },
   };
 

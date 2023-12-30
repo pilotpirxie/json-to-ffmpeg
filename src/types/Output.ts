@@ -9,4 +9,6 @@ export type Output = {
   crf: number;
   framerate: number;
   flags: string[];
+  startPosition: number;
+  endPosition: number;
 };
