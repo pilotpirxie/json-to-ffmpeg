@@ -23,7 +23,11 @@ export function parseImageClip({
   let filters: string[] = [];
 
   if (hasVideo) {
-    filters.push(`loop=loop=-1:size=${duration * output.framerate}`);
+    filters.push(
+      `loop=loop=${duration * output.framerate}:size=${
+        duration * output.framerate
+      }`,
+    );
     filters.push(`setpts=PTS-STARTPTS`);
     filters.push(`scale=${width}:${height}`);
     filters.push(`rotate=${rotation}`);

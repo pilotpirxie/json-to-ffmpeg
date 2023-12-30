@@ -4,7 +4,9 @@ import { parseTracks } from "./parseTracks";
 import { parseOutput } from "./parseOutput";
 
 export function parseSchema(schema: VideoEditorFormat): string {
-  let outputCommand = "ffmpeg ";
+  let outputCommand = "#!/bin/bash\n";
+
+  outputCommand += "ffmpeg \\\n";
 
   outputCommand += parseInputs({
     inputs: schema.inputs,

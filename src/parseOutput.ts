@@ -8,7 +8,7 @@ export function parseOutput({ output }: { output: Output }): string {
 
   const resolution = `${width}x${height}`;
 
-  outputCommand += `-map [video_output] -map [audio_output] -c:v ${videoCodec} -c:a ${audioCodec} -b:v ${bitrate} -r ${framerate} -s ${resolution} ${file}`;
+  outputCommand += `-map '[video_output]' -map '[audio_output]' -c:v ${videoCodec} -c:a ${audioCodec} -b:v ${bitrate} -r ${framerate} -s ${resolution} ${file}`;
 
   return outputCommand;
 }

@@ -29,7 +29,7 @@ export function parseTrack({
       if (gapDuration > 0) {
         const gapLabelName = `gap${getRandomUID()}`;
         if (track.type === "video") {
-          clipsCommand += `color=c=transparent:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
+          clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
         } else if (track.type === "audio") {
           clipsCommand += `anullsrc=d=${gapDuration}[${gapLabelName}];`;
         }
@@ -50,7 +50,7 @@ export function parseTrack({
     if (gapDuration > 0) {
       const gapLabelName = `gap${getRandomUID()}`;
       if (track.type === "video") {
-        clipsCommand += `color=c=transparent:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
+        clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
       } else if (track.type === "audio") {
         clipsCommand += `anullsrc=d=${gapDuration}[${gapLabelName}];`;
       }
