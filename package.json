@@ -5,6 +5,7 @@
   "repository": "https://github.com/pilotpirxie/json-to-ffmpeg.git",
   "author": "pilotpirxie <10637666+pilotpirxie@users.noreply.github.com>",
   "license": "MIT",
+  "types": "./dist/src/index.d.ts",
   "scripts": {
     "build": "tsc"
   },
