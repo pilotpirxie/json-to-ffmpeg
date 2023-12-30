@@ -3,7 +3,10 @@ import { parseInputs } from "./parseInputs";
 import { parseTracks } from "./parseTracks";
 import { parseOutput } from "./parseOutput";
 
-export function parseSchema(schema: VideoEditorFormat): string {
+export function parseSchema(
+  schema: VideoEditorFormat,
+  onlyFilterComplex: boolean = false,
+): string {
   let outputCommand = "#!/bin/bash\n";
 
   outputCommand += "ffmpeg -y \\\n";
@@ -14,10 +17,15 @@ export function parseSchema(schema: VideoEditorFormat): string {
 
   outputCommand += '-filter_complex "';
 
-  outputCommand += parseTracks({
+  const filterComplex = parseTracks({
     schema,
   });
 
+  if (onlyFilterComplex) {
+    return filterComplex;
+  }
+
+  outputCommand += filterComplex;
   outputCommand += '" \\\n';
   outputCommand += parseOutput({
     schema,

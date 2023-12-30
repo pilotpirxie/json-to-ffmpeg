@@ -3,6 +3,7 @@ import { Inputs } from "./types/Inputs";
 import { findInputIndex } from "./utils/findInputIndex";
 import { findInput } from "./utils/findInput";
 import { Output } from "./types/Output";
+import { getRandomUID } from "./utils/uid";
 
 export function parseImageClip({
   clip,
@@ -33,10 +34,14 @@ export function parseImageClip({
     filters.push(`rotate=${rotation}`);
     filters.push(`format=rgba,colorchannelmixer=aa=${opacity}`);
   }
+  const baseTrackLayerName = `${getRandomUID(8)}_base`;
+  const clipTrackLayerName = `${getRandomUID(8)}_clip`;
 
-  let clipCommand = `color=black@0.0:s=${output.width}x${output.height}:d=${clip.duration}[${name}_base];\n`;
-  clipCommand += `[${inputIndex}:v]${filters.join(",")}[${name}_clip];\n`;
-  clipCommand += `[${name}_base][${name}_clip]overlay=${x}:${y}:format=auto[${name}];`;
+  let clipCommand = `color=black@0.0:s=${output.width}x${output.height}:d=${clip.duration}[${baseTrackLayerName}];\n`;
+  clipCommand += `[${inputIndex}:v]${filters.join(
+    ",",
+  )}[${clipTrackLayerName}];\n`;
+  clipCommand += `[${baseTrackLayerName}][${clipTrackLayerName}]overlay=${x}:${y}:format=auto[${name}];`;
 
   return clipCommand;
 }

@@ -27,7 +27,7 @@ export function parseTrack({
       const gapDuration = clip.timelineTrackStart - lastEndTime;
 
       if (gapDuration > 0) {
-        const gapLabelName = `gap${getRandomUID()}`;
+        const gapLabelName = `gap_${getRandomUID()}`;
         if (track.type === "video") {
           clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
         } else if (track.type === "audio") {
@@ -48,7 +48,7 @@ export function parseTrack({
     const gapDuration = totalLength - lastEndTime;
 
     if (gapDuration > 0) {
-      const gapLabelName = `gap${getRandomUID()}`;
+      const gapLabelName = `gap_${getRandomUID()}`;
       if (track.type === "video") {
         clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
       } else if (track.type === "audio") {

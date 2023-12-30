@@ -1,6 +1,7 @@
 import { VideoEditorFormat } from "./types/VideoEditingFormat";
 import { parseTrack } from "./parseTrack";
 import { calculateTotalLength } from "./calculateTotalLength";
+import { getRandomUID } from "./utils/uid";
 
 export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
   const totalLength = calculateTotalLength(schema.tracks);
@@ -23,8 +24,6 @@ export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
     ([, track]) => track.type === "audio",
   );
 
-  const videoTrackNames = videoTracks.map(([trackName]) => trackName);
-
   let previousTrackName = "base";
   for (let i = 0; i < videoTracks.length; i++) {
     const [videoTrackName] = videoTracks[i];
@@ -32,7 +31,7 @@ export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
     let combinedOverlayName =
       i === videoTracks.length - 1
         ? "video_output"
-        : `combined_${videoTrackName}`;
+        : `${getRandomUID(8)}_combined_track`;
 
     tracksCommand += `[${previousTrackName}][${videoTrackName}]overlay=0:0[${combinedOverlayName}];\n`;
     previousTrackName = combinedOverlayName;

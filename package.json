@@ -17,5 +17,29 @@
   "engines": {
     "node": ">=18"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "keywords": [
+    "ffmpeg",
+    "json",
+    "typescript",
+    "video",
+    "audio",
+    "concat",
+    "concatenate",
+    "media",
+    "merge",
+    "mux",
+    "edit",
+    "editing",
+    "editor",
+    "clip",
+    "track",
+    "trim",
+    "cut",
+    "split",
+    "splice"
+  ],
+  "files": [
+    "dist"
+  ]
 }
