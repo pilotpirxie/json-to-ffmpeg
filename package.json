@@ -1,6 +1,6 @@
 {
   "name": "json-to-ffmpeg",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "./dist/src/index.js",
   "repository": "https://github.com/pilotpirxie/json-to-ffmpeg.git",
   "author": "pilotpirxie <10637666+pilotpirxie@users.noreply.github.com>",
