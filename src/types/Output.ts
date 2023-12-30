@@ -1,11 +1,12 @@
 export type Output = {
   file: string;
-  format: string;
   videoCodec: string;
   audioCodec: string;
   width: number;
   height: number;
-  bitrate: string;
+  audioBitrate: string;
+  preset: string;
+  crf: number;
   framerate: number;
   flags: string[];
 };

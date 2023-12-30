@@ -243,25 +243,15 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
     },
     output: {
       file: "output.mp4",
-      format: "mp4",
-      videoCodec: "libx264",
+      videoCodec: "libx264", // libx264, h264_videotoolbox, hevc_videotoolbox
       audioCodec: "aac",
       width: 1920,
       height: 1080,
-      bitrate: "1000k",
+      audioBitrate: "320k",
+      preset: "veryfast",
+      crf: 23,
       framerate: 30,
-      flags: [
-        "-movflags",
-        "+faststart",
-        "-profile:v",
-        "high",
-        "-level",
-        "4.2",
-        "-crf",
-        "18",
-        "-pix_fmt",
-        "yuv420p",
-      ],
+      flags: ["-pix_fmt", "yuv420p"],
     },
   };
 
