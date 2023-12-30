@@ -17,7 +17,7 @@ export function parseClip({
   let clipString = "";
 
   if (clip.clipType === "video") {
-    clipString += parseVideoClip({ clip, inputs });
+    clipString += parseVideoClip({ clip, inputs, output });
   } else if (clip.clipType === "audio") {
     clipString += parseAudioClip({ clip, inputs });
   } else if (clip.clipType === "image") {

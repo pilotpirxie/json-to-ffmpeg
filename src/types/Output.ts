@@ -7,4 +7,5 @@ export type Output = {
   height: number;
   bitrate: string;
   framerate: number;
+  flags: string[];
 };

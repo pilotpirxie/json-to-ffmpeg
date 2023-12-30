@@ -6,7 +6,7 @@ import { parseOutput } from "./parseOutput";
 export function parseSchema(schema: VideoEditorFormat): string {
   let outputCommand = "#!/bin/bash\n";
 
-  outputCommand += "ffmpeg \\\n";
+  outputCommand += "ffmpeg -y \\\n";
 
   outputCommand += parseInputs({
     inputs: schema.inputs,
@@ -20,7 +20,7 @@ export function parseSchema(schema: VideoEditorFormat): string {
 
   outputCommand += '" \\\n';
   outputCommand += parseOutput({
-    output: schema.output,
+    schema,
   });
 
   return outputCommand;
