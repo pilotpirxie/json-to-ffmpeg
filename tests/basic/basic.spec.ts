@@ -61,8 +61,8 @@ import { VideoEditorFormat } from "../../src/types/VideoEditingFormat";
           {
             name: "clip1",
             source: "source1",
-            timelineTrackStart: 0,
-            duration: 5,
+            timelineTrackStart: 3,
+            duration: 2,
             sourceStartOffset: 10,
             clipType: "video",
             transform: {
@@ -79,7 +79,7 @@ import { VideoEditorFormat } from "../../src/types/VideoEditingFormat";
             name: "clip2",
             source: "source1",
             timelineTrackStart: 5,
-            duration: 5,
+            duration: 1,
             sourceStartOffset: 30,
             clipType: "video",
             transform: {
@@ -203,7 +203,7 @@ import { VideoEditorFormat } from "../../src/types/VideoEditingFormat";
             name: "watermark_clip",
             source: "watermark",
             timelineTrackStart: 0,
-            duration: 60,
+            duration: 30,
             sourceStartOffset: 0,
             clipType: "image",
             transform: {

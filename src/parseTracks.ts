@@ -12,6 +12,7 @@ export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
       track,
       inputs: schema.inputs,
       output: schema.output,
+      totalLength,
     });
   }
 

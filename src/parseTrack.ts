@@ -8,27 +8,66 @@ export function parseTrack({
   track,
   inputs,
   output,
+  totalLength,
 }: {
   trackName: string;
   track: Track;
   inputs: Inputs;
   output: Output;
+  totalLength: number;
 }): string {
-  let clips = "";
+  let clipsCommand = "";
+  let clipLabelsToConcat = [];
+  let lastEndTime = 0;
+  let gapsCount = 0;
 
   for (const clip of track.clips) {
-    clips += parseClip({ clip, inputs, output });
+    if (clip.timelineTrackStart > lastEndTime) {
+      const gapDuration = clip.timelineTrackStart - lastEndTime;
+
+      if (gapDuration > 0) {
+        const gapLabelName = `gap${gapsCount}`;
+        if (track.type === "video") {
+          clipsCommand += `color=c=transparent:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
+        } else if (track.type === "audio") {
+          clipsCommand += `anullsrc=d=${gapDuration}[${gapLabelName}];`;
+        }
+
+        clipLabelsToConcat.push(gapLabelName);
+        gapsCount++;
+      }
+    }
+
+    clipsCommand += parseClip({ clip, inputs, output });
+    clipLabelsToConcat.push(clip.name);
+    lastEndTime = clip.timelineTrackStart + clip.duration;
   }
 
-  for (const clip of track.clips) {
-    clips += `[${clip.name}]`;
+  if (lastEndTime < totalLength) {
+    const gapDuration = totalLength - lastEndTime;
+
+    if (gapDuration > 0) {
+      const gapLabelName = `gap${gapsCount}`;
+      if (track.type === "video") {
+        clipsCommand += `color=c=transparent:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
+      } else if (track.type === "audio") {
+        clipsCommand += `anullsrc=d=${gapDuration}[${gapLabelName}];`;
+      }
+
+      clipLabelsToConcat.push(gapLabelName);
+      gapsCount++;
+    }
+  }
+
+  for (const label of clipLabelsToConcat) {
+    clipsCommand += `[${label}]`;
   }
 
   if (track.type === "video") {
-    clips += `concat=n=${track.clips.length}:v=1:a=0[${trackName}];\n`;
+    clipsCommand += `concat=n=${clipLabelsToConcat.length}:v=1:a=0[${trackName}];\n`;
   } else if (track.type === "audio") {
-    clips += `concat=n=${track.clips.length}:v=0:a=1[${trackName}];\n`;
+    clipsCommand += `concat=n=${clipLabelsToConcat.length}:v=0:a=1[${trackName}];\n`;
   }
 
-  return clips;
+  return clipsCommand;
 }
