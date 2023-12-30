@@ -281,7 +281,7 @@ The timeline description in JSON format:
 }
 ```
 
-will be translated using thi app into this command:
+will be translated using this app into this command:
 
 ```bash
 #!/bin/bash
