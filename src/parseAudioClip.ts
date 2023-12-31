@@ -1,8 +1,12 @@
 import { AudioClip } from "./types/Clip";
 import { Inputs } from "./types/Inputs";
 import { findInputIndex } from "./utils/findInputIndex";
-import { findInput } from "./utils/findInput";
 
+/**
+ * Parse an audio clip object schema and return a ffmpeg filter command.
+ * @param clip
+ * @param inputs
+ */
 export function parseAudioClip({
   clip,
   inputs,
@@ -13,16 +17,25 @@ export function parseAudioClip({
   const { duration, sourceStartOffset, source, volume, name } = clip;
 
   const inputIndex = findInputIndex(inputs, source);
-  const input = findInput(inputs, source);
-  const { hasAudio } = input;
 
   let filters: string[] = [];
 
-  if (hasAudio) {
-    filters.push(`atrim=${sourceStartOffset}:${sourceStartOffset + duration}`);
-    filters.push(`asetpts=PTS-STARTPTS`);
-    filters.push(`volume=${volume}`);
-  }
+  /**
+   * The atrim filter is used to cut the clip
+   * to the correct duration and from the
+   * correct start offset.
+   */
+  filters.push(`atrim=${sourceStartOffset}:${sourceStartOffset + duration}`);
+
+  /**
+   * Reset the presentation timestamp to 0 after trimming.
+   */
+  filters.push(`asetpts=PTS-STARTPTS`);
+
+  /**
+   * Set the volume of the clip.
+   */
+  filters.push(`volume=${volume}`);
 
   return `[${inputIndex}:a]${filters.join(",")}[${name}];`;
 }

@@ -2,9 +2,15 @@ import { Clip } from "./types/Clip";
 import { Inputs } from "./types/Inputs";
 import { parseVideoClip } from "./parseVideoClip";
 import { parseAudioClip } from "./parseAudioClip";
-import { parseImageClip } from "./parseImageClip";
 import { Output } from "./types/Output";
 
+/**
+ * This is simple intermediate function that serves
+ * as a router for the different clip type parsers.
+ * @param clip
+ * @param inputs
+ * @param output
+ */
 export function parseClip({
   clip,
   inputs,
@@ -16,12 +22,10 @@ export function parseClip({
 }): string {
   let clipString = "";
 
-  if (clip.clipType === "video") {
+  if (clip.clipType === "video" || clip.clipType === "image") {
     clipString += parseVideoClip({ clip, inputs, output });
   } else if (clip.clipType === "audio") {
     clipString += parseAudioClip({ clip, inputs });
-  } else if (clip.clipType === "image") {
-    clipString += parseImageClip({ clip, inputs, output });
   }
 
   return clipString + "\n";

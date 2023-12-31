@@ -1,9 +1,12 @@
 import { VideoEditorFormat } from "./types/VideoEditingFormat";
-import { calculateTotalLength } from "./calculateTotalLength";
 
+/**
+ * Parse output schema object and return command
+ * with flags and arguments configured in options.
+ * @param schema
+ */
 export function parseOutput({ schema }: { schema: VideoEditorFormat }): string {
   let outputCommand = "";
-  const totalLength = calculateTotalLength(schema.tracks);
 
   const {
     file,
