@@ -4,6 +4,14 @@ import { parseClip } from "./parseClip";
 import { Output } from "./types/Output";
 import { getRandomUID } from "./utils/uid";
 
+/**
+ * Parse a single track into a string.
+ * @param trackName
+ * @param track
+ * @param inputs
+ * @param output
+ * @param totalLength
+ */
 export function parseTrack({
   trackName,
   track,
@@ -18,48 +26,52 @@ export function parseTrack({
   totalLength: number;
 }): string {
   let clipsCommand = "";
+
   let clipLabelsToConcat = [];
-  let lastEndTime = 0;
-  let gapsCount = 0;
+  let previousClipEndTime = 0;
 
+  /**
+   * Fill all gaps between clips with transparent video or silence,
+   * add the gap to the clipsCommand, add the gap label to the concat array,
+   * add the clip to the concat array.
+   */
   for (const clip of track.clips) {
-    if (clip.timelineTrackStart > lastEndTime) {
-      const gapDuration = clip.timelineTrackStart - lastEndTime;
+    if (clip.timelineTrackStart > previousClipEndTime) {
+      const gap = getGapFiller({
+        trackType: track.type,
+        output,
+        duration: clip.timelineTrackStart - previousClipEndTime,
+      });
 
-      if (gapDuration > 0) {
-        const gapLabelName = `gap_${getRandomUID()}`;
-        if (track.type === "video") {
-          clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
-        } else if (track.type === "audio") {
-          clipsCommand += `anullsrc=d=${gapDuration}[${gapLabelName}];`;
-        }
-
-        clipLabelsToConcat.push(gapLabelName);
-        gapsCount++;
-      }
+      clipsCommand += gap.command;
+      clipLabelsToConcat.push(gap.gapLabelName);
     }
 
     clipsCommand += parseClip({ clip, inputs, output });
     clipLabelsToConcat.push(clip.name);
-    lastEndTime = clip.timelineTrackStart + clip.duration;
+    previousClipEndTime = clip.timelineTrackStart + clip.duration;
   }
 
-  if (lastEndTime < totalLength) {
-    const gapDuration = totalLength - lastEndTime;
+  /**
+   * If the last clip ends before the totalLength of the video, fill the gap
+   * with transparent video or silence, add the gap to the clipsCommand, add
+   * the gap label to the concat array.
+   */
+  if (previousClipEndTime < totalLength) {
+    const gap = getGapFiller({
+      trackType: track.type,
+      output,
+      duration: totalLength - previousClipEndTime,
+    });
 
-    if (gapDuration > 0) {
-      const gapLabelName = `gap_${getRandomUID()}`;
-      if (track.type === "video") {
-        clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${gapDuration}[${gapLabelName}];\n`;
-      } else if (track.type === "audio") {
-        clipsCommand += `anullsrc=d=${gapDuration}[${gapLabelName}];`;
-      }
-
-      clipLabelsToConcat.push(gapLabelName);
-      gapsCount++;
-    }
+    clipsCommand += gap.command;
+    clipLabelsToConcat.push(gap.gapLabelName);
   }
 
+  /**
+   * Concat all clips in the concat array into a single clip.
+   * Use concat filter for both because we want to achieve sequence of clips.
+   */
   for (const label of clipLabelsToConcat) {
     clipsCommand += `[${label}]`;
   }
@@ -71,4 +83,31 @@ export function parseTrack({
   }
 
   return clipsCommand;
+}
+
+/**
+ * Get a gap filler command depending on the track type.
+ * For video, it will be a transparent video, for audio, it will be silence.
+ * @param trackType
+ * @param output
+ * @param duration
+ */
+export function getGapFiller({
+  trackType,
+  output,
+  duration,
+}: {
+  trackType: "video" | "audio";
+  output: Output;
+  duration: number;
+}): { command: string; gapLabelName: string } {
+  const gapLabelName = `gap_${getRandomUID()}`;
+
+  return {
+    command:
+      trackType === "video"
+        ? `color=c=black@0.0:s=${output.width}x${output.height}:d=${duration}[${gapLabelName}];\n`
+        : `anullsrc=d=${duration}[${gapLabelName}];\n`,
+    gapLabelName,
+  };
 }

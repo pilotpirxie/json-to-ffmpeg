@@ -73,7 +73,6 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
               rotation: 0,
               opacity: 1,
             },
-            transitions: [],
           },
           {
             name: "clip2",
@@ -90,7 +89,6 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
               rotation: 0,
               opacity: 1,
             },
-            transitions: [],
           },
           {
             name: "clip3",
@@ -107,7 +105,6 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
               rotation: 45,
               opacity: 0.5,
             },
-            transitions: [],
           },
           {
             name: "clip4",
@@ -124,7 +121,6 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
               rotation: 0,
               opacity: 1,
             },
-            transitions: [],
           },
           {
             name: "clip5",
@@ -141,7 +137,6 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
               rotation: 0,
               opacity: 1,
             },
-            transitions: [],
           },
           {
             name: "clip6",
@@ -158,7 +153,6 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
               rotation: 0,
               opacity: 1,
             },
-            transitions: [],
           },
           {
             name: "clip7",
@@ -175,7 +169,6 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
               rotation: 0,
               opacity: 1,
             },
-            transitions: [],
           },
           {
             name: "clip8",
@@ -192,7 +185,6 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
               rotation: 0,
               opacity: 1,
             },
-            transitions: [],
           },
         ],
       },
@@ -241,6 +233,14 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
         ],
       },
     },
+    transitions: [
+      {
+        type: "fade",
+        duration: 1,
+        from: "black",
+        to: "clip1",
+      },
+    ],
     output: {
       file: "output.mp4",
       videoCodec: "libx264", // libx264, h264_videotoolbox, hevc_videotoolbox

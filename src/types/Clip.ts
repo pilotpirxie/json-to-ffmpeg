@@ -1,5 +1,4 @@
 import { Transform } from "./Transform";
-import { Transition } from "./Transition";
 
 export type ImageClip = {
   name: string;
@@ -19,7 +18,6 @@ export type VideoClip = {
   sourceStartOffset: number;
   clipType: "video";
   transform: Transform;
-  transitions: Transition[];
 };
 
 export type AudioClip = {
