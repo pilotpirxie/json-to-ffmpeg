@@ -252,7 +252,10 @@ export function parseTrack({
 
       previousClipGroup = {
         label: transitionData.transitionLabelName,
-        duration: previousClipGroup.duration + currentClipGroup.duration,
+        duration:
+          previousClipGroup.duration +
+          currentClipGroup.duration -
+          (transition?.duration || 0),
         isGap: false,
         originalLabel: currentClipGroup.originalLabel,
       };
@@ -324,9 +327,6 @@ export function getXfadeTransition({
   let commandToReturn = "";
   const { framerate } = output;
 
-  /**
-   * Set fps for both clips to the output fps to make xfade works correctly.
-   */
   const fromIntermediateLabel = `fps_${from}_${getRandomUID(8)}`;
   const toIntermediateLabel = `fps_${to}_${getRandomUID(8)}`;
 
@@ -337,7 +337,7 @@ export function getXfadeTransition({
     ? customLabel
     : `${labelPrefix || ""}_xfade_${getRandomUID()}`;
 
-  commandToReturn += `[${fromIntermediateLabel}][${toIntermediateLabel}]xfade=transition=${type}:duration=${duration}:offset=${offset},fps=${framerate}[${transitionLabelName}];\n`;
+  commandToReturn += `[${fromIntermediateLabel}][${toIntermediateLabel}]xfade=transition=${type}:duration=${duration}:offset=${offset},setpts=PTS-STARTPTS,fps=${framerate}[${transitionLabelName}];\n`;
 
   return {
     command: commandToReturn,
@@ -367,7 +367,7 @@ export function getConcatTransition({
 
   const { framerate } = output;
   return {
-    command: `[${from}][${to}]concat=n=2:v=1:a=0[${transitionLabelName}];\n`,
+    command: `[${from}][${to}]concat=n=2:v=1:a=0,setpts=PTS-STARTPTS,fps=${framerate}[${transitionLabelName}];\n`,
     transitionLabelName,
   };
 }
