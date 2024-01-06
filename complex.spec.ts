@@ -271,6 +271,18 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
         from: "watermark_clip",
         to: null,
       },
+      {
+        type: "fade",
+        duration: 0.5,
+        from: "clip4",
+        to: "clip5",
+      },
+      {
+        type: "smoothdown",
+        duration: 0.5,
+        from: "clip5",
+        to: "clip6",
+      },
     ],
     output: {
       file: "output.mp4",

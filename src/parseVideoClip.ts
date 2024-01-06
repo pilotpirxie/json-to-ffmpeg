@@ -52,6 +52,11 @@ export function parseVideoClip({
   filters.push(`setpts=PTS-STARTPTS`);
 
   /**
+   * Set framerate to the output framerate.
+   */
+  filters.push(`fps=${output.framerate}`);
+
+  /**
    * Scale the clip to the correct size.
    */
   filters.push(`scale=${width}:${height}`);
@@ -92,7 +97,7 @@ export function parseVideoClip({
    */
   clipCommand += `[${baseTrackLayerName}][${clipTrackLayerName}]overlay=${x}:${y}:format=auto,${postOverlayFilters.join(
     ",",
-  )}[${name}];`;
+  )},fps=${output.framerate}[${name}];`;
 
   return clipCommand;
 }

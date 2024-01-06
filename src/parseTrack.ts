@@ -116,7 +116,12 @@ export function parseTrack({
    * Otherwise, use concat filter. There may be maximum two transitions per clip because
    * it may be on the beginning and on the end of the clip.
    */
-  let clipGroupLabels: string[] = [];
+  let clipGroupLabels: {
+    label: string;
+    duration: number;
+    isGap: boolean;
+    originalLabel: string;
+  }[] = [];
 
   /**
    * Only for transition from/to void.
@@ -127,7 +132,12 @@ export function parseTrack({
       let originalClipToConcatLabel = currentClip.label;
 
       if (currentClip.isGap) {
-        clipGroupLabels.push(currentClip.label);
+        clipGroupLabels.push({
+          label: currentClip.label,
+          duration: currentClip.duration,
+          isGap: true,
+          originalLabel: originalClipToConcatLabel,
+        });
         continue;
       }
 
@@ -140,9 +150,21 @@ export function parseTrack({
           (1 / output.framerate) * SAFE_FRAMES_FOR_TRANSITION;
 
         clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${transitionStart.duration}[void_${currentClip.label}];\n`;
-        clipsCommand += `[void_${currentClip.label}][${currentClip.label}]xfade=transition=${transitionStart.type}:duration=${safeTransitionDuration}:offset=0[${currentClip.label}_from_xfade];\n`;
+
+        const transitionData = getXfadeTransition({
+          from: `void_${currentClip.label}`,
+          to: currentClip.label,
+          duration: safeTransitionDuration,
+          type: transitionStart.type,
+          output,
+          offset: 0,
+          labelPrefix: "start",
+        });
+
+        clipsCommand += transitionData.command;
+
         currentClip = {
-          label: `${currentClip.label}_from_xfade`,
+          label: transitionData.transitionLabelName,
           duration: currentClip.duration,
           isGap: false,
         };
@@ -157,28 +179,81 @@ export function parseTrack({
           (1 / output.framerate) * SAFE_FRAMES_FOR_TRANSITION;
 
         clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${transitionEnd.duration}[void_${currentClip.label}];\n`;
-        clipsCommand += `[${currentClip.label}][void_${
-          currentClip.label
-        }]xfade=transition=${
-          transitionEnd.type
-        }:duration=${safeTransitionDuration}:offset=${
-          currentClip.duration - transitionEnd.duration
-        }[${currentClip.label}_to_xfade];\n`;
+
+        const transitionData = getXfadeTransition({
+          from: currentClip.label,
+          to: `void_${currentClip.label}`,
+          duration: safeTransitionDuration,
+          type: transitionEnd.type,
+          output,
+          offset: currentClip.duration - transitionEnd.duration,
+          labelPrefix: "end",
+        });
+
+        clipsCommand += transitionData.command;
+
         currentClip = {
-          label: `${currentClip.label}_to_xfade`,
+          label: transitionData.transitionLabelName,
           duration: currentClip.duration,
           isGap: false,
         };
       }
 
-      clipGroupLabels.push(currentClip.label);
+      clipGroupLabels.push({
+        label: currentClip.label,
+        duration: currentClip.duration,
+        isGap: false,
+        originalLabel: originalClipToConcatLabel,
+      });
     }
 
-    for (const clipLabel of clipGroupLabels) {
-      clipsCommand += `[${clipLabel}]`;
-    }
+    let previousClipGroup: {
+      label: string;
+      duration: number;
+      isGap: boolean;
+      originalLabel: string;
+    } = clipGroupLabels[0];
+    for (let i = 1; i < clipGroupLabels.length; i++) {
+      const currentClipGroup = clipGroupLabels[i];
+      const isLastClipGroup = i === clipGroupLabels.length - 1;
 
-    clipsCommand += `concat=n=${clipGroupLabels.length}:v=1:a=0[${trackName}];\n`;
+      const transition = transitions.find(
+        (t) =>
+          t.from === previousClipGroup.originalLabel &&
+          t.to === currentClipGroup.originalLabel,
+      );
+
+      const useConcat =
+        previousClipGroup.isGap || currentClipGroup.isGap || !transition;
+
+      const transitionData = useConcat
+        ? getConcatTransition({
+            from: previousClipGroup.label,
+            to: currentClipGroup.label,
+            output,
+            labelPrefix: "between",
+            customLabel: isLastClipGroup ? trackName : undefined,
+          })
+        : getXfadeTransition({
+            from: previousClipGroup.label,
+            to: currentClipGroup.label,
+            duration: transition?.duration || 0,
+            type: transition?.type || "fade",
+            output,
+            offset: previousClipGroup.duration - transition?.duration || 0,
+            labelPrefix: "between",
+            customLabel: isLastClipGroup ? trackName : undefined,
+          });
+
+      clipsCommand += transitionData.command;
+
+      previousClipGroup = {
+        label: transitionData.transitionLabelName,
+        duration: previousClipGroup.duration + currentClipGroup.duration,
+        isGap: false,
+        originalLabel: currentClipGroup.originalLabel,
+      };
+    }
   }
 
   if (track.type === "audio") {
@@ -216,5 +291,78 @@ export function getGapFiller({
         ? `color=c=black@0.0:s=${output.width}x${output.height}:d=${duration}[${gapLabelName}];\n`
         : `anullsrc=d=${duration}[${gapLabelName}];\n`,
     gapLabelName,
+  };
+}
+
+export function getXfadeTransition({
+  from,
+  to,
+  duration,
+  type,
+  output,
+  offset,
+  labelPrefix,
+  customLabel,
+}: {
+  from: string;
+  to: string;
+  duration: number;
+  type: string;
+  output: Output;
+  offset: number;
+  labelPrefix?: string;
+  customLabel?: string;
+}): {
+  command: string;
+  transitionLabelName: string;
+} {
+  let commandToReturn = "";
+  const { framerate } = output;
+
+  /**
+   * Set fps for both clips to the output fps to make xfade works correctly.
+   */
+  const fromIntermediateLabel = `fps_${from}_${getRandomUID(8)}`;
+  const toIntermediateLabel = `fps_${to}_${getRandomUID(8)}`;
+
+  commandToReturn += `[${from}]fps=${framerate}[${fromIntermediateLabel}];\n`;
+  commandToReturn += `[${to}]fps=${framerate}[${toIntermediateLabel}];\n`;
+
+  const transitionLabelName = customLabel
+    ? customLabel
+    : `${labelPrefix || ""}_xfade_${getRandomUID()}`;
+
+  commandToReturn += `[${fromIntermediateLabel}][${toIntermediateLabel}]xfade=transition=${type}:duration=${duration}:offset=${offset},fps=${framerate}[${transitionLabelName}];\n`;
+
+  return {
+    command: commandToReturn,
+    transitionLabelName,
+  };
+}
+
+export function getConcatTransition({
+  from,
+  to,
+  output,
+  labelPrefix,
+  customLabel,
+}: {
+  from: string;
+  to: string;
+  output: Output;
+  labelPrefix?: string;
+  customLabel?: string;
+}): {
+  command: string;
+  transitionLabelName: string;
+} {
+  const transitionLabelName = customLabel
+    ? customLabel
+    : `${labelPrefix || ""}_concat_${getRandomUID()}`;
+
+  const { framerate } = output;
+  return {
+    command: `[${from}][${to}]concat=n=2:v=1:a=0[${transitionLabelName}];\n`,
+    transitionLabelName,
   };
 }
