@@ -21,10 +21,13 @@ export function parseOutput({ schema }: { schema: VideoEditorFormat }): string {
     preset,
     startPosition,
     endPosition,
+    scaleRatio,
   } = schema.output;
-
-  const resolution = `${width}x${height}`;
   const additionalFlags = flags.length > 0 ? flags.join(" ") : "";
+
+  const renderWidth = Math.round(width * scaleRatio);
+  const renderHeight = Math.round(height * scaleRatio);
+  const resolution = `${renderWidth}x${renderHeight}`;
 
   outputCommand += `-map '[video_output]' -map '[audio_output]' -c:v ${videoCodec} -c:a ${audioCodec} -b:a ${audioBitrate} -r ${framerate} -s ${resolution} -ss ${startPosition} -t ${
     endPosition - startPosition

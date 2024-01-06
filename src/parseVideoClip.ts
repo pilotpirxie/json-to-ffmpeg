@@ -21,7 +21,12 @@ export function parseVideoClip({
 }): string {
   const { duration, sourceStartOffset, source, transform, name, clipType } =
     clip;
-  const { width, height, rotation, opacity, y, x } = transform;
+  const { rotation, opacity } = transform;
+
+  const width = Math.round(transform.width * output.scaleRatio);
+  const height = Math.round(transform.height * output.scaleRatio);
+  const x = Math.round(transform.x * output.scaleRatio);
+  const y = Math.round(transform.y * output.scaleRatio);
 
   const inputIndex = findInputIndex(inputs, source);
 
@@ -78,7 +83,10 @@ export function parseVideoClip({
   const baseTrackLayerName = `${getRandomUID(8)}_base`;
   const clipTrackLayerName = `${getRandomUID(8)}_clip`;
 
-  let clipCommand = `color=black@0.0:s=${output.width}x${output.height}:d=${clip.duration}[${baseTrackLayerName}];\n`;
+  const outputWidth = Math.round(output.width * output.scaleRatio);
+  const outputHeight = Math.round(output.height * output.scaleRatio);
+
+  let clipCommand = `color=black@0.0:s=${outputWidth}x${outputHeight}:d=${clip.duration}[${baseTrackLayerName}];\n`;
   clipCommand += `[${inputIndex}:v]${filters.join(
     ",",
   )}[${clipTrackLayerName}];\n`;

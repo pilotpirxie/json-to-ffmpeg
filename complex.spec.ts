@@ -283,6 +283,12 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
         from: "clip5",
         to: "clip6",
       },
+      {
+        type: "smoothdown",
+        duration: 0.5,
+        from: "clip8",
+        to: null,
+      },
     ],
     output: {
       file: "output.mp4",
@@ -296,7 +302,8 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
       framerate: 30,
       flags: ["-pix_fmt", "yuv420p"],
       startPosition: 0,
-      endPosition: 35,
+      endPosition: 40,
+      scaleRatio: 0.2,
     },
   };
 

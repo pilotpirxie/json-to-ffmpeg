@@ -141,6 +141,9 @@ export function parseTrack({
         continue;
       }
 
+      const width = Math.round(output.width * output.scaleRatio);
+      const height = Math.round(output.height * output.scaleRatio);
+
       const transitionStart = transitions.find(
         (t) => t.from === null && t.to === originalClipToConcatLabel,
       );
@@ -149,7 +152,7 @@ export function parseTrack({
           transitionStart.duration -
           (1 / output.framerate) * SAFE_FRAMES_FOR_TRANSITION;
 
-        clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${transitionStart.duration}[void_${currentClip.label}];\n`;
+        clipsCommand += `color=c=black@0.0:s=${width}x${height}:d=${transitionStart.duration}[void_${currentClip.label}];\n`;
 
         const transitionData = getXfadeTransition({
           from: `void_${currentClip.label}`,
@@ -178,7 +181,7 @@ export function parseTrack({
           transitionEnd.duration -
           (1 / output.framerate) * SAFE_FRAMES_FOR_TRANSITION;
 
-        clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${transitionEnd.duration}[void_${currentClip.label}];\n`;
+        clipsCommand += `color=c=black@0.0:s=${width}x${height}:d=${transitionEnd.duration}[void_${currentClip.label}];\n`;
 
         const transitionData = getXfadeTransition({
           from: currentClip.label,
@@ -284,11 +287,13 @@ export function getGapFiller({
   duration: number;
 }): { command: string; gapLabelName: string } {
   const gapLabelName = `gap_${getRandomUID()}`;
+  const width = Math.round(output.width * output.scaleRatio);
+  const height = Math.round(output.height * output.scaleRatio);
 
   return {
     command:
       trackType === "video"
-        ? `color=c=black@0.0:s=${output.width}x${output.height}:d=${duration}[${gapLabelName}];\n`
+        ? `color=c=black@0.0:s=${width}x${height}:d=${duration}[${gapLabelName}];\n`
         : `anullsrc=d=${duration}[${gapLabelName}];\n`,
     gapLabelName,
   };

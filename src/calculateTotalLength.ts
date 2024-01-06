@@ -1,4 +1,5 @@
 import { Tracks } from "./types/Tracks";
+import { Transition } from "./types/Transition";
 
 /**
  * Get total length of the output video.
@@ -14,9 +15,14 @@ import { Tracks } from "./types/Tracks";
  * the total time during which each clip is fully visible in sequential timeline.
  * The calculation needs to account for these overlapping durations to ensure
  * an accurate total video length.
+ *
  * @param tracks
+ * @param transitions
  */
-export function calculateTotalLength(tracks: Tracks): number {
+export function calculateTotalLength(
+  tracks: Tracks,
+  transitions: Transition[],
+): number {
   let maxLength = 0;
   Object.values(tracks).forEach((track) => {
     track.clips.forEach((clip) => {
@@ -26,5 +32,10 @@ export function calculateTotalLength(tracks: Tracks): number {
       }
     });
   });
-  return maxLength;
+
+  const transitionsLength = transitions
+    .filter((transition) => transition.from !== null && transition.to !== null)
+    .reduce((acc, transition) => acc + transition.duration, 0);
+
+  return maxLength - transitionsLength;
 }

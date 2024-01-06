@@ -9,13 +9,15 @@ import { getRandomUID } from "./utils/uid";
  * @param schema
  */
 export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
-  const totalLength = calculateTotalLength(schema.tracks);
+  const totalLength = calculateTotalLength(schema.tracks, schema.transitions);
 
   /**
    * Create a black base video stream to overlay.
    * It's background of the whole video, visible on the bottom.
    */
-  let tracksCommand = `color=c=black:s=${schema.output.width}x${schema.output.height}:d=${totalLength}[base];\n`;
+  const width = Math.round(schema.output.width * schema.output.scaleRatio);
+  const height = Math.round(schema.output.height * schema.output.scaleRatio);
+  let tracksCommand = `color=c=black:s=${width}x${height}:d=${totalLength}[base];\n`;
 
   /**
    * Loop over each track object schema and parse it.

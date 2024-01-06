@@ -11,4 +11,5 @@ export type Output = {
   flags: string[];
   startPosition: number;
   endPosition: number;
+  scaleRatio: number;
 };
