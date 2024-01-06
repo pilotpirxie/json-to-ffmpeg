@@ -265,6 +265,12 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
         from: "clip3",
         to: null,
       },
+      {
+        type: "squeezeh",
+        duration: 0.5,
+        from: "watermark_clip",
+        to: null,
+      },
     ],
     output: {
       file: "output.mp4",

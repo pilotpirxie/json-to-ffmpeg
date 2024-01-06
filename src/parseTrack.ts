@@ -5,6 +5,18 @@ import { Output } from "./types/Output";
 import { getRandomUID } from "./utils/uid";
 import { Transition } from "./types/Transition";
 
+/**
+ * Real length of the transition is shorter
+ * because xfade and concat filters need frames
+ * from the second clip to create a transition.
+ * We need to subtract those frames from the
+ * transition so transition won't fully overlap
+ * the second clip. FFmpeg will round the frame
+ * count to the nearest frame, so we need to
+ * subtract two frames.
+ */
+const SAFE_FRAMES_FOR_TRANSITION = 2;
+
 type ClipToConcat = {
   label: string;
   duration: number;
@@ -18,6 +30,7 @@ type ClipToConcat = {
  * @param inputs
  * @param output
  * @param totalLength
+ * @param transitions
  */
 export function parseTrack({
   trackName,
@@ -122,8 +135,12 @@ export function parseTrack({
         (t) => t.from === null && t.to === originalClipToConcatLabel,
       );
       if (transitionStart) {
+        const safeTransitionDuration =
+          transitionStart.duration -
+          (1 / output.framerate) * SAFE_FRAMES_FOR_TRANSITION;
+
         clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${transitionStart.duration}[void_${currentClip.label}];\n`;
-        clipsCommand += `[void_${currentClip.label}][${currentClip.label}]xfade=transition=${transitionStart.type}:duration=${transitionStart.duration}:offset=0[${currentClip.label}_from_xfade];\n`;
+        clipsCommand += `[void_${currentClip.label}][${currentClip.label}]xfade=transition=${transitionStart.type}:duration=${safeTransitionDuration}:offset=0[${currentClip.label}_from_xfade];\n`;
         currentClip = {
           label: `${currentClip.label}_from_xfade`,
           duration: currentClip.duration,
@@ -135,14 +152,18 @@ export function parseTrack({
         (t) => t.from === originalClipToConcatLabel && t.to === null,
       );
       if (transitionEnd) {
+        const safeTransitionDuration =
+          transitionEnd.duration -
+          (1 / output.framerate) * SAFE_FRAMES_FOR_TRANSITION;
+
         clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${transitionEnd.duration}[void_${currentClip.label}];\n`;
         clipsCommand += `[${currentClip.label}][void_${
           currentClip.label
-        }]xfade=transition=${transitionEnd.type}:duration=${
-          transitionEnd.duration
-        }:offset=${currentClip.duration - transitionEnd.duration}[${
-          currentClip.label
-        }_to_xfade];\n`;
+        }]xfade=transition=${
+          transitionEnd.type
+        }:duration=${safeTransitionDuration}:offset=${
+          currentClip.duration - transitionEnd.duration
+        }[${currentClip.label}_to_xfade];\n`;
         currentClip = {
           label: `${currentClip.label}_to_xfade`,
           duration: currentClip.duration,
