@@ -27,6 +27,7 @@ export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
       inputs: schema.inputs,
       output: schema.output,
       totalLength,
+      transitions: schema.transitions,
     });
   }
 
@@ -64,7 +65,11 @@ export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
   for (const [audioTrackName] of audioTracks) {
     tracksCommand += `[${audioTrackName}]`;
   }
-  tracksCommand += `amix=inputs=${audioTracks.length}:duration=longest[audio_output];`;
+  if (audioTracks.length > 1) {
+    tracksCommand += `amix=inputs=${audioTracks.length}:duration=longest[audio_output];`;
+  } else {
+    tracksCommand += `anull[audio_output];`;
+  }
 
   return tracksCommand;
 }

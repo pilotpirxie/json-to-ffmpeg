@@ -3,6 +3,13 @@ import { Inputs } from "./types/Inputs";
 import { parseClip } from "./parseClip";
 import { Output } from "./types/Output";
 import { getRandomUID } from "./utils/uid";
+import { Transition } from "./types/Transition";
+
+type ClipToConcat = {
+  label: string;
+  duration: number;
+  isGap: boolean;
+};
 
 /**
  * Parse a single track into a string.
@@ -18,16 +25,18 @@ export function parseTrack({
   inputs,
   output,
   totalLength,
+  transitions,
 }: {
   trackName: string;
   track: Track;
   inputs: Inputs;
   output: Output;
   totalLength: number;
+  transitions: Transition[];
 }): string {
   let clipsCommand = "";
 
-  let clipLabelsToConcat = [];
+  let clipsToConcat: ClipToConcat[] = [];
   let previousClipEndTime = 0;
 
   /**
@@ -44,11 +53,19 @@ export function parseTrack({
       });
 
       clipsCommand += gap.command;
-      clipLabelsToConcat.push(gap.gapLabelName);
+      clipsToConcat.push({
+        label: gap.gapLabelName,
+        duration: clip.timelineTrackStart - previousClipEndTime,
+        isGap: true,
+      });
     }
 
     clipsCommand += parseClip({ clip, inputs, output });
-    clipLabelsToConcat.push(clip.name);
+    clipsToConcat.push({
+      label: clip.name,
+      duration: clip.duration,
+      isGap: false,
+    });
     previousClipEndTime = clip.timelineTrackStart + clip.duration;
   }
 
@@ -65,21 +82,90 @@ export function parseTrack({
     });
 
     clipsCommand += gap.command;
-    clipLabelsToConcat.push(gap.gapLabelName);
+    clipsToConcat.push({
+      label: gap.gapLabelName,
+      duration: totalLength - previousClipEndTime,
+      isGap: true,
+    });
   }
 
   /**
-   * Concat all clips in the concat array into a single clip.
-   * Use concat filter for both because we want to achieve sequence of clips.
+   * If the track is audio, concat the clips into one audio stream using the concat filter.
+   * If the track is video, concat every two clips into one video stream using the xfade filter. Then
+   * concat next video clip with the previous xfade output. Repeat until all clips are concatenated.
+   *
+   * There are three situations when we need to use xfade filter:
+   * 1. When transition is from void (transparent or black) to a clip.
+   * 2. When transition is from a clip to void.
+   * 3. When transition is from a clip to another clip.
+   *
+   * In all three situations, we need to use xfade filter to create a smooth transition.
+   * Otherwise, use concat filter. There may be maximum two transitions per clip because
+   * it may be on the beginning and on the end of the clip.
    */
-  for (const label of clipLabelsToConcat) {
-    clipsCommand += `[${label}]`;
+  let clipGroupLabels: string[] = [];
+
+  /**
+   * Only for transition from/to void.
+   */
+  if (track.type === "video") {
+    for (let i = 0; i < clipsToConcat.length; i++) {
+      let currentClip = clipsToConcat[i];
+      let originalClipToConcatLabel = currentClip.label;
+
+      if (currentClip.isGap) {
+        clipGroupLabels.push(currentClip.label);
+        continue;
+      }
+
+      const transitionStart = transitions.find(
+        (t) => t.from === null && t.to === originalClipToConcatLabel,
+      );
+      if (transitionStart) {
+        clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${transitionStart.duration}[void_${currentClip.label}];\n`;
+        clipsCommand += `[void_${currentClip.label}][${currentClip.label}]xfade=transition=${transitionStart.type}:duration=${transitionStart.duration}:offset=0[${currentClip.label}_from_xfade];\n`;
+        currentClip = {
+          label: `${currentClip.label}_from_xfade`,
+          duration: currentClip.duration,
+          isGap: false,
+        };
+      }
+
+      const transitionEnd = transitions.find(
+        (t) => t.from === originalClipToConcatLabel && t.to === null,
+      );
+      if (transitionEnd) {
+        clipsCommand += `color=c=black@0.0:s=${output.width}x${output.height}:d=${transitionEnd.duration}[void_${currentClip.label}];\n`;
+        clipsCommand += `[${currentClip.label}][void_${
+          currentClip.label
+        }]xfade=transition=${transitionEnd.type}:duration=${
+          transitionEnd.duration
+        }:offset=${currentClip.duration - transitionEnd.duration}[${
+          currentClip.label
+        }_to_xfade];\n`;
+        currentClip = {
+          label: `${currentClip.label}_to_xfade`,
+          duration: currentClip.duration,
+          isGap: false,
+        };
+      }
+
+      clipGroupLabels.push(currentClip.label);
+    }
+
+    for (const clipLabel of clipGroupLabels) {
+      clipsCommand += `[${clipLabel}]`;
+    }
+
+    clipsCommand += `concat=n=${clipGroupLabels.length}:v=1:a=0[${trackName}];\n`;
   }
 
-  if (track.type === "video") {
-    clipsCommand += `concat=n=${clipLabelsToConcat.length}:v=1:a=0[${trackName}];\n`;
-  } else if (track.type === "audio") {
-    clipsCommand += `concat=n=${clipLabelsToConcat.length}:v=0:a=1[${trackName}];\n`;
+  if (track.type === "audio") {
+    for (const clip of clipsToConcat) {
+      clipsCommand += `[${clip.label}]`;
+    }
+
+    clipsCommand += `concat=n=${clipsToConcat.length}:v=0:a=1[${trackName}];\n`;
   }
 
   return clipsCommand;

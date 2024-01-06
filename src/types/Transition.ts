@@ -1,6 +1,6 @@
 export type Transition = {
-  type: "fade";
-  from: string;
-  to: string;
+  type: string;
+  from: string | null;
+  to: string | null;
   duration: number;
 };

@@ -3,6 +3,7 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
 
 (async () => {
   const schema: VideoEditorFormat = {
+    version: 1,
     inputs: {
       source1: {
         type: "video",
@@ -235,10 +236,34 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
     },
     transitions: [
       {
-        type: "fade",
-        duration: 1,
-        from: "black",
+        type: "smoothup",
+        duration: 0.5,
+        from: null,
         to: "clip1",
+      },
+      {
+        type: "smoothdown",
+        duration: 0.5,
+        from: "clip1",
+        to: null,
+      },
+      {
+        type: "fade",
+        duration: 0.5,
+        from: null,
+        to: "clip2",
+      },
+      {
+        type: "circlecrop",
+        duration: 0.5,
+        from: "clip2",
+        to: null,
+      },
+      {
+        type: "squeezev",
+        duration: 0.5,
+        from: "clip3",
+        to: null,
       },
     ],
     output: {
