@@ -291,6 +291,7 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
       },
     ],
     output: {
+      tempDir: "./tmp",
       file: "output.mp4",
       videoCodec: "libx264", // libx264, h264_videotoolbox, hevc_videotoolbox
       audioCodec: "aac",
@@ -303,7 +304,7 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
       flags: ["-pix_fmt", "yuv420p"],
       startPosition: 0,
       endPosition: 38,
-      scaleRatio: 0.2,
+      scaleRatio: 0.5,
     },
   };
 

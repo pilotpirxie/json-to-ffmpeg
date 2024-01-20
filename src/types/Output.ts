@@ -1,4 +1,5 @@
 export type Output = {
+  tempDir: string;
   file: string;
   videoCodec: string;
   audioCodec: string;

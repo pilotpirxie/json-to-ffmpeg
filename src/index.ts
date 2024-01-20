@@ -6,9 +6,18 @@ import { preprocessClips } from "./preprocessClips";
 import { InputFiles } from "./types/InputFiles";
 
 export function parseSchema(
-  schema: VideoEditorFormat,
+  schemaObjectOrString: VideoEditorFormat | string,
   onlyFilterComplex: boolean = false,
 ): string {
+  const schema =
+    typeof schemaObjectOrString === "string"
+      ? JSON.parse(schemaObjectOrString)
+      : schemaObjectOrString;
+
+  if (schema.version !== 1) {
+    throw new Error("Schema version not supported");
+  }
+
   let outputCommand = "#!/bin/bash\n";
   const inputFiles: InputFiles = [];
 

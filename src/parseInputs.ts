@@ -15,9 +15,10 @@ export function parseInputs({ schema }: { schema: VideoEditorFormat }): {
   for (const [trackName, track] of Object.entries(schema.tracks)) {
     for (const clip of track.clips) {
       const { source, clipType, name, sourceStartOffset, duration } = clip;
+      const { tempDir } = schema.output;
 
       if (clipType === "video") {
-        inputsCommand += `-i ./tmp/${name}.mp4 \\\n`;
+        inputsCommand += `-i ${tempDir}/${name}.mp4 \\\n`;
         inputFiles.push({
           file: `${name}_tmp.mp4`,
           name: `${name}`,
