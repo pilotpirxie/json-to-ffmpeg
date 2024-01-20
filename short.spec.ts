@@ -291,6 +291,7 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
       },
     ],
     output: {
+      tempDir: "./tmp",
       file: "output.mp4",
       videoCodec: "libx264", // libx264, h264_videotoolbox, hevc_videotoolbox
       audioCodec: "aac",
