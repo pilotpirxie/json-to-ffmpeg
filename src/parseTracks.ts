@@ -2,13 +2,21 @@ import { VideoEditorFormat } from "./types/VideoEditingFormat";
 import { parseTrack } from "./parseTrack";
 import { calculateTotalLength } from "./calculateTotalLength";
 import { getRandomUID } from "./utils/uid";
+import { InputFiles } from "./types/InputFiles";
 
 /**
  * Loop over each track, parse it, and combine
  * as two streams. One for video and one for audio.
  * @param schema
+ * @param inputFiles
  */
-export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
+export function parseTracks({
+  schema,
+  inputFiles,
+}: {
+  schema: VideoEditorFormat;
+  inputFiles: InputFiles;
+}): string {
   const totalLength = calculateTotalLength(schema.tracks, schema.transitions);
 
   /**
@@ -26,10 +34,10 @@ export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
     tracksCommand += parseTrack({
       trackName,
       track,
-      inputs: schema.inputs,
       output: schema.output,
       totalLength,
       transitions: schema.transitions,
+      inputFiles,
     });
   }
 
@@ -69,8 +77,10 @@ export function parseTracks({ schema }: { schema: VideoEditorFormat }): string {
   }
   if (audioTracks.length > 1) {
     tracksCommand += `amix=inputs=${audioTracks.length}:duration=longest[audio_output];`;
+  } else if (audioTracks.length === 1) {
+    tracksCommand += `volume=1[audio_output];`;
   } else {
-    tracksCommand += `anull[audio_output];`;
+    tracksCommand += `anullsrc=channel_layout=stereo:sample_rate=44100:d=${totalLength}[audio_output];`;
   }
 
   return tracksCommand;

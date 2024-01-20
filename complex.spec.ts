@@ -216,8 +216,8 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
           {
             name: "audio_clip1",
             source: "audio1",
-            timelineTrackStart: 0,
-            duration: 20,
+            timelineTrackStart: 5,
+            duration: 10,
             sourceStartOffset: 0,
             clipType: "audio",
             volume: 1,
@@ -226,7 +226,7 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
             name: "audio_clip2",
             source: "audio2",
             timelineTrackStart: 20,
-            duration: 20,
+            duration: 15,
             sourceStartOffset: 0,
             clipType: "audio",
             volume: 1,
@@ -302,7 +302,7 @@ import { VideoEditorFormat } from "./src/types/VideoEditingFormat";
       framerate: 30,
       flags: ["-pix_fmt", "yuv420p"],
       startPosition: 0,
-      endPosition: 40,
+      endPosition: 38,
       scaleRatio: 0.2,
     },
   };

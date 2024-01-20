@@ -1,6 +1,5 @@
-import { Inputs } from "../types/Inputs";
+import { InputFiles } from "../types/InputFiles";
 
-export function findInputIndex(inputs: Inputs, inputName: string): number {
-  const inputNames = Object.keys(inputs);
-  return inputNames.indexOf(inputName);
+export function findInputIndex(inputFiles: InputFiles, name: string): number {
+  return inputFiles.findIndex((inputFile) => inputFile.name === name);
 }

@@ -1,23 +1,23 @@
 import { ImageClip, VideoClip } from "./types/Clip";
-import { Inputs } from "./types/Inputs";
 import { findInputIndex } from "./utils/findInputIndex";
 import { Output } from "./types/Output";
 import { getRandomUID } from "./utils/uid";
+import { InputFiles } from "./types/InputFiles";
 
 /**
  * Parse a video clip object schema and return a ffmpeg filter command.
  * @param clip
- * @param inputs
  * @param output
+ * @param inputFiles
  */
 export function parseVideoClip({
   clip,
-  inputs,
   output,
+  inputFiles,
 }: {
   clip: VideoClip | ImageClip;
-  inputs: Inputs;
   output: Output;
+  inputFiles: InputFiles;
 }): string {
   const { duration, sourceStartOffset, source, transform, name, clipType } =
     clip;
@@ -28,18 +28,16 @@ export function parseVideoClip({
   const x = Math.round(transform.x * output.scaleRatio);
   const y = Math.round(transform.y * output.scaleRatio);
 
-  const inputIndex = findInputIndex(inputs, source);
+  let inputIndex = 0;
+  if (clipType === "video") {
+    inputIndex = findInputIndex(inputFiles, name);
+  } else {
+    inputIndex = findInputIndex(inputFiles, source);
+  }
 
   let filters: string[] = [];
 
-  if (clipType === "video") {
-    /**
-     * The trim filter is used to cut the clip
-     * to the correct duration and from the
-     * correct start offset.
-     */
-    filters.push(`trim=${sourceStartOffset}:${sourceStartOffset + duration}`);
-  } else if (clipType === "image") {
+  if (clipType === "image") {
     /**
      * The loop filter is used to extend length of the image video stream.
      * By default, is only one frame long.
@@ -49,17 +47,17 @@ export function parseVideoClip({
         duration * output.framerate
       }`,
     );
+
+    /**
+     * Set the start offset of the image video stream.
+     */
+    filters.push(`setpts=PTS-STARTPTS`);
+
+    /**
+     * Set framerate to the output framerate.
+     */
+    filters.push(`fps=${output.framerate}`);
   }
-
-  /**
-   * Reset the presentation timestamp to 0 after trimming.
-   */
-  filters.push(`setpts=PTS-STARTPTS`);
-
-  /**
-   * Set framerate to the output framerate.
-   */
-  filters.push(`fps=${output.framerate}`);
 
   /**
    * Scale the clip to the correct size.

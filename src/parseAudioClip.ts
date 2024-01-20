@@ -1,22 +1,22 @@
 import { AudioClip } from "./types/Clip";
-import { Inputs } from "./types/Inputs";
 import { findInputIndex } from "./utils/findInputIndex";
+import { InputFiles } from "./types/InputFiles";
 
 /**
  * Parse an audio clip object schema and return a ffmpeg filter command.
  * @param clip
- * @param inputs
+ * @param inputFiles
  */
 export function parseAudioClip({
   clip,
-  inputs,
+  inputFiles,
 }: {
   clip: AudioClip;
-  inputs: Inputs;
+  inputFiles: InputFiles;
 }): string {
   const { duration, sourceStartOffset, source, volume, name } = clip;
 
-  const inputIndex = findInputIndex(inputs, source);
+  const inputIndex = findInputIndex(inputFiles, source);
 
   let filters: string[] = [];
 

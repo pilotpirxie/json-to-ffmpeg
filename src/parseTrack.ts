@@ -1,9 +1,9 @@
 import { Track } from "./types/Tracks";
-import { Inputs } from "./types/Inputs";
 import { parseClip } from "./parseClip";
 import { Output } from "./types/Output";
 import { getRandomUID } from "./utils/uid";
 import { Transition } from "./types/Transition";
+import { InputFiles } from "./types/InputFiles";
 
 /**
  * Real length of the transition is shorter
@@ -27,25 +27,25 @@ type ClipToConcat = {
  * Parse a single track into a string.
  * @param trackName
  * @param track
- * @param inputs
  * @param output
  * @param totalLength
  * @param transitions
+ * @param inputFiles
  */
 export function parseTrack({
   trackName,
   track,
-  inputs,
   output,
   totalLength,
   transitions,
+  inputFiles,
 }: {
   trackName: string;
   track: Track;
-  inputs: Inputs;
   output: Output;
   totalLength: number;
   transitions: Transition[];
+  inputFiles: InputFiles;
 }): string {
   let clipsCommand = "";
 
@@ -73,7 +73,7 @@ export function parseTrack({
       });
     }
 
-    clipsCommand += parseClip({ clip, inputs, output });
+    clipsCommand += parseClip({ clip, output, inputFiles });
     clipsToConcat.push({
       label: clip.name,
       duration: clip.duration,
@@ -297,7 +297,7 @@ export function getGapFiller({
     command:
       trackType === "video"
         ? `color=c=black@0.0:s=${width}x${height}:d=${duration}[${gapLabelName}];\n`
-        : `anullsrc=d=${duration}[${gapLabelName}];\n`,
+        : `anullsrc=channel_layout=stereo:sample_rate=44100:d=${duration}[${gapLabelName}];\n`,
     gapLabelName,
   };
 }
@@ -337,7 +337,7 @@ export function getXfadeTransition({
     ? customLabel
     : `${labelPrefix || ""}_xfade_${getRandomUID()}`;
 
-  commandToReturn += `[${fromIntermediateLabel}][${toIntermediateLabel}]xfade=transition=${type}:duration=${duration}:offset=${offset},setpts=PTS-STARTPTS,fps=${framerate}[${transitionLabelName}];\n`;
+  commandToReturn += `[${fromIntermediateLabel}][${toIntermediateLabel}]xfade=transition=${type}:duration=${duration}:offset=${offset},fps=${framerate}[${transitionLabelName}];\n`;
 
   return {
     command: commandToReturn,
@@ -367,7 +367,7 @@ export function getConcatTransition({
 
   const { framerate } = output;
   return {
-    command: `[${from}][${to}]concat=n=2:v=1:a=0,setpts=PTS-STARTPTS,fps=${framerate}[${transitionLabelName}];\n`,
+    command: `[${from}][${to}]concat=n=2:v=1:a=0,fps=${framerate}[${transitionLabelName}];\n`,
     transitionLabelName,
   };
 }
