@@ -216,6 +216,16 @@ export function parseTrack({
       isGap: boolean;
       originalLabel: string;
     } = clipGroupLabels[0];
+
+    /**
+     * If there is only one clip without any gaps, there is no need for any transition.
+     * Instead map the clip to the track name and continue to the next track.
+     */
+    if (clipGroupLabels.length === 1) {
+      clipsCommand += `[${previousClipGroup.label}]setpts=PTS-STARTPTS[${trackName}];\n`;
+      return clipsCommand;
+    }
+
     for (let i = 1; i < clipGroupLabels.length; i++) {
       const currentClipGroup = clipGroupLabels[i];
       const isLastClipGroup = i === clipGroupLabels.length - 1;
